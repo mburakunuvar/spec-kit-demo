@@ -12,9 +12,15 @@ Contoso employees currently store work documents in disconnected locations — l
 ## Target Users
 
 - **Employees**: Upload and manage their own documents and documents for assigned projects
-- **Team Leads**: View and manage documents uploaded by their team members
-- **Project Managers**: Manage all documents associated with their projects
+- **Team Leads**: View, edit metadata, and replace files for documents uploaded by their team members; Team Leads cannot delete documents they did not upload
+- **Project Managers**: Manage all documents associated with their projects (including deletion)
 - **Administrators**: Full access to all documents for audit and compliance purposes
+
+## Clarifications
+
+### Session 2026-04-05
+
+- Q: What management actions can Team Leads perform on documents uploaded by their team members? → A: Team Leads can view and edit metadata/replace file for team-member uploads, but cannot delete (delete is restricted to document owners, Project Managers, and Administrators).
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -98,7 +104,7 @@ An employee uploaded a document with an incorrect title and needs to correct it.
 
 1. **Given** a user who uploaded a document, **When** they edit its title, description, category, or tags and save, **Then** the changes are reflected in the document list.
 2. **Given** a user who uploaded a document, **When** they replace the document file with an updated version, **Then** the new file is stored and available for download while metadata is preserved.
-3. **Given** a user who did not upload a document, **When** they attempt to edit its metadata, **Then** the system denies the action (unless they are a Project Manager for the associated project or an Administrator).
+3. **Given** a user who did not upload a document, **When** they attempt to edit its metadata, **Then** the system denies the action (unless they are a Team Lead whose team includes the uploader, a Project Manager for the associated project, or an Administrator).
 
 ---
 
@@ -239,9 +245,10 @@ An administrator needs to review document activity for a compliance audit. They 
 **Document Management**
 
 - **FR-019**: Document owners MUST be able to edit the title, description, category, and tags of their documents.
+- **FR-019a**: Team Leads MUST be able to view, edit metadata, and replace the file of any document uploaded by a member of their team; Team Leads MUST NOT be able to delete documents they did not upload.
 - **FR-020**: Document owners MUST be able to replace a document file with an updated version while retaining existing metadata.
 - **FR-021**: Document owners MUST be able to delete their own documents after confirming a deletion prompt.
-- **FR-022**: Project Managers MUST be able to delete any document associated with their projects.
+- **FR-022**: Project Managers MUST be able to delete any document associated with their projects; Administrators MUST be able to delete any document in the system.
 - **FR-023**: Deleted documents MUST be permanently removed from the system.
 
 **Document Sharing**
