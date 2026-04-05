@@ -3,6 +3,7 @@ using ContosoDashboard.Data;
 using ContosoDashboard.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,7 +16,7 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthenticationStat
 
 // Configure Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Configure Mock Authentication (Cookie-based for training purposes)
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -49,6 +50,14 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Configure forwarded headers for Codespaces port forwarding
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost
+};
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 // Initialize database
 using (var scope = app.Services.CreateScope())
 {
@@ -70,11 +79,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
     app.UseHsts();
-}
-else
-{
-    // Use HSTS even in development for training purposes
-    app.UseHsts();
+    app.UseHttpsRedirection();
 }
 
 // Add security headers
@@ -92,12 +97,10 @@ app.Use(async (context, next) =>
         "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; " +
         "font-src 'self' https://cdn.jsdelivr.net; " +
         "img-src 'self' data: https:; " +
-        "connect-src 'self' wss: ws:;";
+        "connect-src 'self' wss: ws: https://*.app.github.dev wss://*.app.github.dev;";
     
     await next();
 });
-
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
